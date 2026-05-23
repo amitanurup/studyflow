@@ -3,6 +3,7 @@
 Modern daily study and homework dashboard with:
 
 - homework entries that can be submitted only with an uploaded proof file
+- ready-made Class 6 CBSE daily tasks for Maths, Science, English, SST and Hindi
 - focus timer with automatic credited study-time totals and history
 - compulsory daily study proof upload after completing a study session
 - optional webcam focus mode using local-only presence/activity detection

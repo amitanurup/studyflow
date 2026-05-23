@@ -1204,7 +1204,8 @@ input::placeholder {
 .camera-shell video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: #061521;
   transform: scaleX(-1);
 }
 
@@ -1350,7 +1351,8 @@ input::placeholder {
   display: block;
   width: 100%;
   height: 126px;
-  object-fit: cover;
+  object-fit: contain;
+  background: #071525;
 }
 
 .note-photo div {

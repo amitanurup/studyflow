@@ -7,29 +7,47 @@ const defaultData = {
   dailyGoal: 120,
   tasks: [
     {
-      id: "sample-1",
-      title: "Math Assignment - Chapter 5",
+      id: "class6-math-fractions",
+      title: "Class 6 Maths: Fractions practice, 20 sums",
       subject: "Mathematics",
-      due: offsetDate(1),
+      due: offsetDate(0),
       priority: "high",
       submitted: false,
       attachment: ""
     },
     {
-      id: "sample-2",
-      title: "Physics Lab Report",
-      subject: "Physics",
-      due: offsetDate(2),
+      id: "class6-science-food",
+      title: "Class 6 Science: Food components notes + 5 Q&A",
+      subject: "Science",
+      due: offsetDate(0),
       priority: "medium",
       submitted: false,
-      attachment: "Lab-notes.pdf"
+      attachment: ""
     },
     {
-      id: "sample-3",
-      title: "English Essay Draft",
+      id: "class6-english-reading",
+      title: "Class 6 English: 1 chapter reading + 10 new words",
       subject: "English",
-      due: offsetDate(-1),
+      due: offsetDate(1),
       priority: "low",
+      submitted: false,
+      attachment: ""
+    },
+    {
+      id: "class6-social-history",
+      title: "Class 6 SST: History chapter revision, make 8 points",
+      subject: "Social Science",
+      due: offsetDate(1),
+      priority: "medium",
+      submitted: false,
+      attachment: ""
+    },
+    {
+      id: "class6-hindi-writing",
+      title: "Class 6 Hindi: 1 page handwriting + difficult words",
+      subject: "Hindi",
+      due: offsetDate(0),
+      priority: "medium",
       submitted: false,
       attachment: ""
     }
@@ -132,6 +150,7 @@ let toastTimeout;
 initialize();
 
 function initialize() {
+  ensureClass6CbseTasks();
   els.todayLabel.textContent = new Intl.DateTimeFormat("en-IN", {
     weekday: "long",
     day: "numeric",
@@ -148,6 +167,20 @@ function initialize() {
   loadSubmissions();
   window.setInterval(tick, 1000);
   window.addEventListener("beforeunload", persistActiveSession);
+}
+
+function ensureClass6CbseTasks() {
+  const class6TaskIds = new Set(defaultData.tasks.map((task) => task.id));
+  const hasClass6Tasks = state.data.tasks.some((task) => class6TaskIds.has(task.id));
+  const hasOldSampleTasks = state.data.tasks.some((task) => ["sample-1", "sample-2", "sample-3"].includes(task.id));
+
+  if (hasClass6Tasks && !hasOldSampleTasks) return;
+
+  const existingCustomTasks = state.data.tasks.filter(
+    (task) => !["sample-1", "sample-2", "sample-3"].includes(task.id) && !class6TaskIds.has(task.id)
+  );
+  state.data.tasks = [...structuredClone(defaultData.tasks), ...existingCustomTasks];
+  saveData();
 }
 
 function bindEvents() {

@@ -73,6 +73,16 @@ const requestHandler = (request, response) => {
     response.end(JSON.stringify(notes));
     return;
   }
+  if (url.pathname.startsWith("/api/notes/") && request.method === "DELETE") {
+    const fileName = decodeURIComponent(path.basename(url.pathname));
+    const deleted = deleteNotePhoto(fileName);
+    if (!deleted) {
+      sendJson(response, 404, { message: "Note photo not found." });
+      return;
+    }
+    sendJson(response, 200, { ok: true, fileName });
+    return;
+  }
   if (url.pathname === "/api/submissions" && request.method === "GET") {
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
     response.end(JSON.stringify(readSubmissions()));
@@ -311,6 +321,18 @@ function getSavedNotes() {
       };
     })
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+}
+
+function deleteNotePhoto(fileName) {
+  if (!noteFilePattern.test(fileName)) return false;
+  const filePath = path.join(notesDir, fileName);
+  if (!filePath.startsWith(notesDir)) return false;
+  try {
+    fs.unlinkSync(filePath);
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 function receiveSubmission(request, response) {

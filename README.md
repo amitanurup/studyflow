@@ -28,7 +28,7 @@ For another phone on the same Wi-Fi, use the printed LAN address, for example:
 http://192.168.1.8:4173
 ```
 
-To pair a phone, select **Connect mobile camera** on the dashboard and open the generated mobile link on the phone. The generated link uses the current laptop/server address, so the same copied app works on any laptop.
+To pair a phone, select **Connect mobile camera** on the dashboard and open the generated mobile link on the phone. The generated link uses a permanent room (`STUDYFLOW-MOBILE`), so you can bookmark it on the phone and reuse it for that deployed app.
 
 ## Public launch on Render
 
@@ -104,6 +104,7 @@ saved-notes\
 ```
 
 The saved photos also appear in the dashboard under **Saved note photos**, where they can be opened from the laptop.
+Each saved photo has **Open**, **Download**, and **Delete** actions in the gallery.
 
 ## Strict daily submission
 

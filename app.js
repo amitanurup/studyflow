@@ -1,4 +1,5 @@
 const STORAGE_KEY = "studyflow-data-v1";
+const PERMANENT_MOBILE_ROOM = "STUDYFLOW-MOBILE";
 
 const defaultData = {
   dailyGoal: 120,
@@ -167,6 +168,7 @@ function bindEvents() {
   els.copyLink.addEventListener("click", copyMobileLink);
   els.clearHistory.addEventListener("click", clearHistory);
   els.refreshNotes.addEventListener("click", loadNotes);
+  els.notesGrid.addEventListener("click", handleNoteAction);
   els.studyProofForm.addEventListener("submit", submitStudyProof);
   els.claimReward.addEventListener("click", claimReward);
 }
@@ -277,12 +279,34 @@ function renderNotes() {
           <div>
             <strong>${escapeHtml(note.fileName)}</strong>
             <span>${formatSessionDate(note.createdAt)}</span>
-            <a href="${encodeURI(note.url)}" target="_blank" rel="noopener">Open photo</a>
+            <div class="note-actions">
+              <a href="${encodeURI(note.url)}" target="_blank" rel="noopener">Open</a>
+              <a href="${encodeURI(note.url)}" download="${escapeHtml(note.fileName)}">Download</a>
+              <button type="button" data-note-delete="${escapeHtml(note.fileName)}">Delete</button>
+            </div>
           </div>
         </article>
       `
     )
     .join("");
+}
+
+async function handleNoteAction(event) {
+  const button = event.target.closest("[data-note-delete]");
+  if (!button) return;
+  const fileName = button.dataset.noteDelete;
+  const confirmed = window.confirm("Is note photo ko gallery aur server se delete karna hai?");
+  if (!confirmed) return;
+  try {
+    const response = await fetch(`/api/notes/${encodeURIComponent(fileName)}`, { method: "DELETE" });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || "Delete failed");
+    state.notes = state.notes.filter((note) => note.fileName !== fileName);
+    renderNotes();
+    showToast("Note photo deleted.");
+  } catch (error) {
+    showToast(error.message || "Photo delete nahi ho saki.");
+  }
 }
 
 async function loadNotes() {
@@ -633,11 +657,11 @@ async function handleMobileConnect() {
     disableCamera();
   }
 
-  state.pairingRoom = createRoomCode();
+  state.pairingRoom = PERMANENT_MOBILE_ROOM;
   els.roomCode.textContent = state.pairingRoom;
   els.pairPanel.classList.remove("hidden");
   els.connectPhone.textContent = "Disconnect mobile";
-  els.pairStatus.textContent = "Creating mobile link...";
+  els.pairStatus.textContent = "Creating permanent mobile access link...";
 
   try {
     const response = await fetch("/api/info");

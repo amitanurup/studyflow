@@ -37,10 +37,9 @@ This project is ready for a public HTTPS launch on Render using `render.yaml`.
 1. Create a GitHub repository and push this project folder.
 2. Open Render and choose **New > Blueprint**.
 3. Connect the GitHub repository.
-4. Render will read `render.yaml` and create a web service with:
+4. Render will read `render.yaml` and create a free web service with:
    - `npm ci` build
    - `npm start` run command
-   - `/var/data` persistent disk for uploads
 5. Set the environment variable:
 
 ```text
@@ -55,7 +54,21 @@ https://studyflow.onrender.com
 
 Use that URL on laptop and mobile. Camera permission works on public HTTPS. WebRTC phone pairing uses the same public URL.
 
-Important: public cloud uploads are saved on the Render persistent disk, not on your laptop. Keep `APP_PASSWORD` enabled because homework/study proof files are private.
+Important: Render free tier does not support persistent disks. Homework/study proof uploads and captured photos may disappear after a service restart or redeploy. Keep `APP_PASSWORD` enabled because homework/study proof files are private. For permanent storage, upgrade Render and add a persistent disk, or use Docker/VPS with `DATA_DIR`.
+
+### Permanent uploads on paid Render
+
+If you upgrade to a Render plan that supports disks, add a disk in Render and set:
+
+```text
+DATA_DIR=/var/data
+```
+
+Then mount the disk at:
+
+```text
+/var/data
+```
 
 ## Public launch with Docker/VPS
 

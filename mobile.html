@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="hi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#071525" />
+    <title>StudyFlow Phone Camera</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./mobile.css" />
+  </head>
+  <body>
+    <main class="phone-page">
+      <header class="brand">
+        <span>S</span>
+        <div>
+          <strong>StudyFlow</strong>
+          <small>Phone camera companion</small>
+        </div>
+      </header>
+
+      <section class="phone-card">
+        <p class="eyebrow">MOBILE CAMERA</p>
+        <h1>Laptop se pair karein</h1>
+        <div class="room-row">
+          <span>Room code</span>
+          <strong id="roomLabel">----</strong>
+        </div>
+        <div class="preview">
+          <video id="mobilePreview" autoplay muted playsinline></video>
+          <canvas id="captureCanvas" hidden></canvas>
+          <div id="previewEmpty">
+            <span>◎</span>
+            <p>Camera off</p>
+          </div>
+          <span class="live-tag" id="liveTag">OFF</span>
+        </div>
+        <label class="select-label">
+          Camera choice
+          <select id="facingMode">
+            <option value="environment">Back camera</option>
+            <option value="user">Front camera</option>
+          </select>
+        </label>
+        <button class="primary" id="shareCamera">Share camera with laptop</button>
+        <button class="capture hidden" id="captureNote">Capture note photo</button>
+        <button class="secondary hidden" id="stopCamera">Stop sharing</button>
+        <p class="connection-status" id="connectionStatus">Connecting to laptop...</p>
+      </section>
+
+      <p class="privacy">
+        Live video record nahi hota. Sirf <strong>Capture note photo</strong> tap karne par
+        selected photo paired PC ke <strong>saved-notes</strong> folder me save hoti hai.
+      </p>
+    </main>
+    <script src="./mobile.js"></script>
+  </body>
+</html>

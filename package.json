@@ -1,0 +1,13 @@
+{
+  "name": "studyflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Daily study dashboard with optional paired mobile camera tracking.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "busboy": "^1.6.0",
+    "ws": "^8.18.3"
+  }
+}

@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: studyflow
+    env: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /var/data
+      - key: APP_PASSWORD
+        sync: false
+    disk:
+      name: studyflow-data
+      mountPath: /var/data
+      sizeGB: 1

@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="hi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#071525" />
+    <title>StudyFlow | Daily Study & Homework</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <aside class="reward-flash" id="rewardFlash" aria-label="Study reward announcement">
+      <div class="flash-spark" aria-hidden="true">*</div>
+      <p>
+        <strong>STUDY REWARD ALERT</strong>
+        <span>16 verified hours complete karo</span>
+        <b>Gift up to Rs 50 unlock</b>
+      </p>
+      <span class="flash-pill" id="flashRewardStatus">LOCKED</span>
+    </aside>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">S</span>
+        <div>
+          <strong>StudyFlow</strong>
+          <small>Daily learning dashboard</small>
+        </div>
+      </div>
+      <div class="date-pill">
+        <span class="live-dot"></span>
+        <span id="todayLabel">Aaj</span>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <section class="card reward-card" id="rewardCard">
+        <div class="reward-confetti" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="reward-copy">
+          <div class="reward-heading">
+            <span class="reward-gift" aria-hidden="true">
+              <span class="gift-lid"></span>
+              <span class="gift-box"></span>
+            </span>
+            <div>
+              <p class="eyebrow">MILESTONE REWARD</p>
+              <h2>16 verified study hours = gift unlock</h2>
+            </div>
+          </div>
+          <p class="reward-note">
+            Daily study proof upload ke saath credited time count hoga. Goal complete par
+            <strong>Rs 50 max</strong> ka study gift claim kar sakte hain.
+          </p>
+        </div>
+        <div class="reward-progress">
+          <div class="reward-topline">
+            <strong id="rewardHours">0h / 16h</strong>
+            <span class="reward-badge" id="rewardBadge">Locked</span>
+          </div>
+          <div class="reward-track" aria-label="Gift unlock progress">
+            <span id="rewardFill"></span>
+          </div>
+          <p id="rewardMessage">16h verified study remaining.</p>
+          <button class="btn btn-primary hidden" id="claimReward" type="button">Claim gift up to Rs 50</button>
+        </div>
+      </section>
+
+      <section class="hero card">
+        <div class="hero-copy">
+          <p class="eyebrow">TODAY'S FOCUS</p>
+          <h1>Padho smart, submit on time.</h1>
+          <p class="subcopy">
+            Homework organize karo, focus session start karo aur apna actual study time automatically track karo.
+          </p>
+          <div class="goal-row">
+            <label class="goal-field">
+              Daily goal
+              <div>
+                <input id="dailyGoal" type="number" min="15" max="720" step="5" value="120" />
+                <span>min</span>
+              </div>
+            </label>
+            <div class="progress-ring" id="goalRing" style="--progress: 0">
+              <div>
+                <strong id="goalPercent">0%</strong>
+                <span>complete</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="timer-panel">
+          <div class="session-status">
+            <span class="status-badge" id="timerStatus">Ready</span>
+            <span id="creditStatus">Manual tracking</span>
+          </div>
+          <p class="clock" id="sessionTimer">00:00:00</p>
+          <p class="timer-label">Current focus session</p>
+          <div class="timer-controls">
+            <button class="btn btn-primary" id="startSession">Start study</button>
+            <button class="btn btn-ghost" id="pauseSession" disabled>Pause</button>
+            <button class="btn btn-ghost danger" id="finishSession" disabled>Finish</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="Study statistics">
+        <article class="stat card">
+          <span class="stat-icon lavender">⌁</span>
+          <div>
+            <p>Today's study</p>
+            <strong id="todayMinutes">0 min</strong>
+          </div>
+        </article>
+        <article class="stat card">
+          <span class="stat-icon blue">✓</span>
+          <div>
+            <p>Submitted</p>
+            <strong id="submittedCount">0</strong>
+          </div>
+        </article>
+        <article class="stat card">
+          <span class="stat-icon amber">!</span>
+          <div>
+            <p>Due soon</p>
+            <strong id="dueSoonCount">0</strong>
+          </div>
+        </article>
+        <article class="stat card">
+          <span class="stat-icon mint">◷</span>
+          <div>
+            <p>Focus streak</p>
+            <strong id="streakCount">0 days</strong>
+          </div>
+        </article>
+      </section>
+
+      <section class="card daily-proof">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">STRICT DAILY SUBMISSION</p>
+            <h2>Aaj ka proof upload</h2>
+          </div>
+          <span class="strict-badge">Upload required</span>
+        </div>
+        <div class="proof-grid">
+          <article class="proof-rule">
+            <span class="proof-status" id="homeworkProofStatus">Pending</span>
+            <h3>Homework submissions</h3>
+            <p>Har assignment ke card par solution file/photo upload karna compulsory hai.</p>
+            <strong id="homeworkProofCount">0 proof uploaded</strong>
+          </article>
+          <article class="proof-rule">
+            <span class="proof-status" id="studyProofStatus">Pending today</span>
+            <h3>Daily study submission</h3>
+            <p>Study session complete karke notes, practice page ya revision proof upload karein.</p>
+            <form id="studyProofForm" class="proof-form">
+              <input id="studyProofFile" type="file" accept="image/*,.pdf,.doc,.docx" required aria-label="Upload today's study proof" />
+              <button class="btn btn-primary" type="submit">Upload study proof</button>
+            </form>
+            <a class="proof-link hidden" id="studyProofLink" target="_blank" rel="noopener">Open submitted proof</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="workspace-grid">
+        <section class="card homework">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">HOMEWORK</p>
+              <h2>Assignments</h2>
+            </div>
+            <button class="btn btn-small btn-primary" id="openTaskForm">+ Add task</button>
+          </div>
+
+          <form id="taskForm" class="task-form hidden">
+            <input id="taskTitle" required maxlength="80" placeholder="Assignment title" />
+            <div class="form-pair">
+              <input id="taskSubject" required maxlength="40" placeholder="Subject" />
+              <input id="taskDue" required type="date" />
+            </div>
+            <div>
+              <select id="taskPriority" aria-label="Priority">
+                <option value="medium">Medium priority</option>
+                <option value="high">High priority</option>
+                <option value="low">Low priority</option>
+              </select>
+            </div>
+            <p class="tiny-note">Assignment banane ke baad submit karte waqt proof file upload compulsory hogi.</p>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Save homework</button>
+              <button class="btn btn-ghost" type="button" id="cancelTaskForm">Cancel</button>
+            </div>
+          </form>
+
+          <div class="filters" role="tablist" aria-label="Homework filters">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="pending">Pending</button>
+            <button class="chip" data-filter="submitted">Submitted</button>
+          </div>
+          <div class="task-list" id="taskList"></div>
+        </section>
+
+        <section class="card camera-card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">STUDY PRESENCE</p>
+              <h2>Camera focus mode</h2>
+            </div>
+            <div class="camera-toggle">
+              <span>Laptop</span>
+              <label class="switch">
+                <input id="cameraToggle" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="camera-source-actions">
+            <button class="btn btn-phone" id="connectPhone" type="button">Connect mobile camera</button>
+            <span class="source-label" id="sourceLabel">No camera connected</span>
+          </div>
+          <div class="pair-panel hidden" id="pairPanel">
+            <div class="pair-header">
+              <strong>Phone pairing ready</strong>
+              <button class="text-button" id="closePairing" type="button">Cancel</button>
+            </div>
+            <p>Phone par ye link open karein, phir <strong>Share camera</strong> tap karein.</p>
+            <div class="pair-code"><span>Room code</span><strong id="roomCode">----</strong></div>
+            <div class="link-row">
+              <input id="mobileLink" readonly aria-label="Mobile camera pairing link" />
+              <button class="btn btn-ghost" id="copyLink" type="button">Copy</button>
+            </div>
+            <div class="lan-links hidden" id="lanLinks"></div>
+            <p class="pair-status" id="pairStatus">Waiting for mobile phone...</p>
+          </div>
+          <div class="camera-shell">
+            <video id="cameraPreview" autoplay muted playsinline></video>
+            <canvas id="cameraCanvas" hidden></canvas>
+            <div class="camera-empty" id="cameraEmpty">
+              <span>◎</span>
+              <strong>Camera off</strong>
+              <p>Enable karke study presence detect karein</p>
+            </div>
+            <div class="camera-tag" id="cameraTag">OFF</div>
+          </div>
+          <div class="presence-row">
+            <div>
+              <span class="signal" id="presenceSignal"></span>
+              <strong id="presenceLabel">Tracking disabled</strong>
+            </div>
+            <span class="credited-time" id="creditedTime">0 min credited</span>
+          </div>
+          <p class="privacy-note">
+            Privacy first: live video record nahi hota. Mobile mode me video phone se laptop tak
+            encrypted connection par aata hai; sirf aapke capture kiye note photos PC par save hote hain.
+          </p>
+        </section>
+      </section>
+
+      <section class="card sessions">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">HISTORY</p>
+            <h2>Recent study sessions</h2>
+          </div>
+          <button class="text-button" id="clearHistory">Clear history</button>
+        </div>
+        <div class="sessions-list" id="sessionsList"></div>
+      </section>
+
+      <section class="card captured-notes">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PHONE NOTES</p>
+            <h2>Saved note photos</h2>
+          </div>
+          <button class="text-button" id="refreshNotes" type="button">Refresh</button>
+        </div>
+        <p class="notes-location">Mobile se click ki gayi photos PC par <strong>saved-notes</strong> folder me automatically save hongi.</p>
+        <div class="notes-grid" id="notesGrid"></div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./reward.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

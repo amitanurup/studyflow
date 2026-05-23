@@ -1,5 +1,7 @@
 const STORAGE_KEY = "studyflow-data-v1";
 const PERMANENT_MOBILE_ROOM = "STUDYFLOW-MOBILE";
+const ACTIVE_SESSION_KEY = "studyflow-active-session-v1";
+const CAMERA_PREF_KEY = "studyflow-camera-pref-v1";
 
 const defaultData = {
   dailyGoal: 120,
@@ -138,11 +140,14 @@ function initialize() {
   els.taskDue.value = offsetDate(1);
   els.taskDue.min = toDateKey(new Date());
   els.dailyGoal.value = state.data.dailyGoal;
+  restoreActiveSession();
+  restoreCameraPreference();
   bindEvents();
   render();
   loadNotes();
   loadSubmissions();
   window.setInterval(tick, 1000);
+  window.addEventListener("beforeunload", persistActiveSession);
 }
 
 function bindEvents() {
@@ -383,6 +388,7 @@ function startSession() {
   state.sessionRunning = true;
   state.sessionStartedAt ||= new Date().toISOString();
   state.lastTick = Date.now();
+  persistActiveSession();
   els.startSession.disabled = true;
   els.pauseSession.disabled = false;
   els.finishSession.disabled = false;
@@ -395,6 +401,7 @@ function startSession() {
 function pauseSession() {
   state.sessionRunning = false;
   state.lastTick = null;
+  persistActiveSession();
   els.startSession.disabled = false;
   els.startSession.textContent = "Resume";
   els.pauseSession.disabled = true;
@@ -425,6 +432,7 @@ function finishSession() {
   state.sessionSeconds = 0;
   state.sessionCreditedSeconds = 0;
   state.lastTick = null;
+  clearActiveSession();
   els.startSession.disabled = false;
   els.startSession.textContent = "Start study";
   els.pauseSession.disabled = true;
@@ -443,18 +451,23 @@ function tick() {
   state.lastTick = now;
   state.sessionSeconds += delta;
 
-  if (!state.cameraEnabled || state.presence) {
+  if (shouldCreditStudyTime()) {
     state.sessionCreditedSeconds += delta;
   }
 
   updateTimerView();
   renderStats();
+  persistActiveSession();
 }
 
 function updateTimerView() {
   els.sessionTimer.textContent = formatClock(state.sessionSeconds);
   if (state.cameraEnabled) {
     els.creditStatus.textContent = state.presence ? "Presence confirmed" : "Waiting for presence";
+  } else if (state.cameraSource === "mobile" || state.pairingRoom) {
+    els.creditStatus.textContent = "Waiting for mobile camera reconnect";
+  } else if (state.cameraSource === "laptop") {
+    els.creditStatus.textContent = "Restart laptop camera to credit time";
   } else {
     els.creditStatus.textContent = "Manual tracking";
   }
@@ -616,6 +629,7 @@ async function enableCamera() {
     });
     state.cameraEnabled = true;
     state.cameraSource = "laptop";
+    saveCameraPreference("laptop");
     els.cameraPreview.srcObject = state.cameraStream;
     els.cameraEmpty.classList.add("hidden");
     state.faceDetector = "FaceDetector" in window ? new FaceDetector({ fastMode: true, maxDetectedFaces: 1 }) : null;
@@ -642,6 +656,7 @@ function disableCamera() {
   state.previousFrame = null;
   state.lastActivityAt = null;
   state.presence = false;
+  saveCameraPreference("none");
   els.cameraPreview.srcObject = null;
   els.cameraEmpty.classList.remove("hidden");
   renderCameraStatus();
@@ -658,6 +673,7 @@ async function handleMobileConnect() {
   }
 
   state.pairingRoom = PERMANENT_MOBILE_ROOM;
+  saveCameraPreference("mobile");
   els.roomCode.textContent = state.pairingRoom;
   els.pairPanel.classList.remove("hidden");
   els.connectPhone.textContent = "Disconnect mobile";
@@ -783,6 +799,7 @@ function disconnectMobileCamera() {
   state.pairingRoom = null;
   els.pairPanel.classList.add("hidden");
   els.connectPhone.textContent = "Connect mobile camera";
+  saveCameraPreference("none");
   if (wasMobile) disableCamera();
 }
 
@@ -847,10 +864,14 @@ function renderCameraStatus(method) {
   els.cameraTag.classList.toggle("active", on);
   els.presenceSignal.classList.toggle("active", on && state.presence);
   els.sourceLabel.textContent =
-    state.cameraSource === "mobile"
+    state.cameraEnabled && state.cameraSource === "mobile"
       ? "Mobile camera connected"
-      : state.cameraSource === "laptop"
+      : state.cameraEnabled && state.cameraSource === "laptop"
         ? "Laptop camera active"
+        : state.cameraSource === "mobile" || state.pairingRoom
+          ? "Mobile camera waiting"
+          : state.cameraSource === "laptop"
+            ? "Laptop camera needs restart"
         : "No camera connected";
 
   if (!on) {
@@ -861,6 +882,84 @@ function renderCameraStatus(method) {
     els.presenceLabel.textContent = "Away / no presence";
   }
   updateTimerView();
+}
+
+function shouldCreditStudyTime() {
+  const cameraExpected = state.cameraSource === "mobile" || state.cameraSource === "laptop" || Boolean(state.pairingRoom);
+  return !cameraExpected || (state.cameraEnabled && state.presence);
+}
+
+function persistActiveSession() {
+  if (!state.sessionStartedAt) {
+    clearActiveSession();
+    return;
+  }
+  localStorage.setItem(
+    ACTIVE_SESSION_KEY,
+    JSON.stringify({
+      running: state.sessionRunning,
+      startedAt: state.sessionStartedAt,
+      sessionSeconds: state.sessionSeconds,
+      creditedSeconds: state.sessionCreditedSeconds,
+      savedAt: Date.now(),
+      cameraSource: state.cameraSource,
+      presence: state.presence
+    })
+  );
+}
+
+function restoreActiveSession() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(ACTIVE_SESSION_KEY));
+    if (!saved?.startedAt) return;
+    const elapsedSinceSave = saved.running ? Math.max(0, (Date.now() - saved.savedAt) / 1000) : 0;
+    state.cameraSource = saved.cameraSource || "none";
+    state.sessionRunning = Boolean(saved.running);
+    state.sessionStartedAt = saved.startedAt;
+    state.sessionSeconds = Math.max(0, Number(saved.sessionSeconds) || 0) + elapsedSinceSave;
+    const shouldCreditOffline = saved.running && (!saved.cameraSource || saved.cameraSource === "none");
+    state.sessionCreditedSeconds = Math.max(0, Number(saved.creditedSeconds) || 0) + (shouldCreditOffline ? elapsedSinceSave : 0);
+    state.lastTick = state.sessionRunning ? Date.now() : null;
+    els.startSession.disabled = state.sessionRunning;
+    els.startSession.textContent = state.sessionRunning ? "Start study" : "Resume";
+    els.pauseSession.disabled = !state.sessionRunning;
+    els.finishSession.disabled = false;
+    els.timerStatus.textContent = state.sessionRunning ? "Studying" : "Paused";
+    els.timerStatus.classList.toggle("running", state.sessionRunning);
+  } catch (error) {
+    clearActiveSession();
+  }
+}
+
+function clearActiveSession() {
+  localStorage.removeItem(ACTIVE_SESSION_KEY);
+}
+
+function saveCameraPreference(source) {
+  localStorage.setItem(CAMERA_PREF_KEY, JSON.stringify({ source, savedAt: Date.now() }));
+}
+
+function restoreCameraPreference() {
+  try {
+    const pref = JSON.parse(localStorage.getItem(CAMERA_PREF_KEY));
+    if (pref?.source === "mobile") {
+      window.setTimeout(() => {
+        handleMobileConnect();
+        window.setTimeout(() => {
+          if (state.pairingRoom === PERMANENT_MOBILE_ROOM && state.cameraSource !== "mobile") {
+            els.pairStatus.textContent = "Page reload ke baad mobile camera reconnect ka wait ho raha hai. Phone par saved link open karke Share camera tap karein.";
+          }
+        }, 900);
+      }, 350);
+    } else if (pref?.source === "laptop") {
+      els.cameraToggle.checked = false;
+      window.setTimeout(() => {
+        showToast("Laptop camera reload ke baad browser permission ke liye toggle se dobara start karein.");
+      }, 800);
+    }
+  } catch (error) {
+    saveCameraPreference("none");
+  }
 }
 
 function clearHistory() {

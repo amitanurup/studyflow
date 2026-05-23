@@ -21,9 +21,12 @@
       <div class="flash-spark" aria-hidden="true">*</div>
       <p>
         <strong>STUDY REWARD ALERT</strong>
-        <span>16 verified hours complete karo</span>
-        <b>Gift up to Rs 50 unlock</b>
+        <span id="flashRewardLine">Har verified hour par gift amount badhega</span>
+        <b id="flashRewardAmount">Earn Rs 0 / Rs 50</b>
       </p>
+      <div class="flash-reward-meter" aria-label="Golden reward progress">
+        <span id="flashGoldFill"></span>
+      </div>
       <span class="flash-pill" id="flashRewardStatus">LOCKED</span>
     </aside>
 
@@ -54,12 +57,12 @@
             </span>
             <div>
               <p class="eyebrow">MILESTONE REWARD</p>
-              <h2>16 verified study hours = gift unlock</h2>
+              <h2>Har verified study hour = reward amount</h2>
             </div>
           </div>
           <p class="reward-note">
-            Daily study proof upload ke saath credited time count hoga. Goal complete par
-            <strong>Rs 50 max</strong> ka study gift claim kar sakte hain.
+            Daily study proof upload ke saath credited time count hoga. 16 verified hours par
+            total <strong>Rs 50 max</strong> reward complete hoga.
           </p>
         </div>
         <div class="reward-progress">
@@ -67,11 +70,13 @@
             <strong id="rewardHours">0h / 16h</strong>
             <span class="reward-badge" id="rewardBadge">Locked</span>
           </div>
+          <div class="reward-amount" id="rewardAmount">Earned: Rs 0</div>
           <div class="reward-track" aria-label="Gift unlock progress">
             <span id="rewardFill"></span>
           </div>
+          <div class="reward-steps" id="rewardSteps" aria-label="Hourly reward amount list"></div>
           <p id="rewardMessage">16h verified study remaining.</p>
-          <button class="btn btn-primary hidden" id="claimReward" type="button">Claim gift up to Rs 50</button>
+          <button class="btn btn-primary hidden" id="claimReward" type="button">Claim reward</button>
         </div>
       </section>
 

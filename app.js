@@ -57,7 +57,10 @@ const defaultData = {
   totals: {},
   rewards: {
     milestone16Claimed: false,
-    milestone16ClaimedAt: null
+    milestone16ClaimedAt: null,
+    claimedRewardHours: 0,
+    claimedRewardAmount: 0,
+    claimedRewardAt: null
   }
 };
 
@@ -140,11 +143,16 @@ const els = {
   studyProofLink: document.querySelector("#studyProofLink"),
   rewardHours: document.querySelector("#rewardHours"),
   rewardBadge: document.querySelector("#rewardBadge"),
+  rewardAmount: document.querySelector("#rewardAmount"),
   rewardFill: document.querySelector("#rewardFill"),
+  rewardSteps: document.querySelector("#rewardSteps"),
   rewardMessage: document.querySelector("#rewardMessage"),
   claimReward: document.querySelector("#claimReward"),
   rewardCard: document.querySelector("#rewardCard"),
   rewardFlash: document.querySelector("#rewardFlash"),
+  flashRewardLine: document.querySelector("#flashRewardLine"),
+  flashRewardAmount: document.querySelector("#flashRewardAmount"),
+  flashGoldFill: document.querySelector("#flashGoldFill"),
   flashRewardStatus: document.querySelector("#flashRewardStatus"),
   toast: document.querySelector("#toast")
 };
@@ -384,29 +392,63 @@ function renderDailyProof() {
 
 function renderReward() {
   const verifiedSeconds = StudyReward.calculateVerifiedStudySeconds(state.data.sessions, state.submissions);
-  const unlocked = StudyReward.isUnlocked(verifiedSeconds);
-  const claimed = Boolean(state.data.rewards?.milestone16Claimed);
+  const completedHours = StudyReward.calculateCompletedHours(verifiedSeconds);
+  const earnedAmount = StudyReward.calculateRewardAmount(verifiedSeconds);
+  const claimedHours = state.data.rewards?.milestone16Claimed
+    ? StudyReward.TARGET_HOURS
+    : Number(state.data.rewards?.claimedRewardHours || 0);
+  const claimedAmount = state.data.rewards?.milestone16Claimed
+    ? StudyReward.MAX_REWARD_RUPEES
+    : Number(state.data.rewards?.claimedRewardAmount || 0);
+  const unlocked = earnedAmount > 0;
+  const fullyUnlocked = StudyReward.isUnlocked(verifiedSeconds);
+  const claimed = claimedHours >= completedHours && completedHours > 0;
+  const canClaim = completedHours > claimedHours && earnedAmount > claimedAmount;
   const progress = StudyReward.calculateProgress(verifiedSeconds);
   const remainingSeconds = Math.max(0, StudyReward.TARGET_SECONDS - verifiedSeconds);
   const hours = verifiedSeconds / 3600;
   els.rewardHours.textContent = `${formatHours(hours)} / 16h`;
+  els.rewardAmount.textContent = `Earned: Rs ${earnedAmount} of Rs ${StudyReward.MAX_REWARD_RUPEES}`;
   els.rewardFill.style.width = `${progress}%`;
+  els.flashGoldFill.style.width = `${progress}%`;
   els.rewardBadge.className = `reward-badge${claimed ? " claimed" : unlocked ? " unlocked" : ""}`;
-  els.rewardBadge.textContent = claimed ? "Claimed" : unlocked ? "Unlocked" : "Locked";
+  els.rewardBadge.textContent = claimed ? "Claimed" : unlocked ? `Rs ${earnedAmount} unlocked` : "Locked";
   els.rewardCard.classList.toggle("unlocked", unlocked && !claimed);
-  els.rewardCard.classList.toggle("claimed", claimed);
+  els.rewardCard.classList.toggle("claimed", claimed || fullyUnlocked);
   els.rewardFlash.classList.toggle("unlocked", unlocked && !claimed);
-  els.rewardFlash.classList.toggle("claimed", claimed);
-  els.flashRewardStatus.textContent = claimed ? "CLAIMED" : unlocked ? "UNLOCKED" : "LOCKED";
-  els.claimReward.classList.toggle("hidden", !unlocked || claimed);
+  els.rewardFlash.classList.toggle("claimed", claimed || fullyUnlocked);
+  els.flashRewardStatus.textContent = claimed ? "CLAIMED" : unlocked ? `RS ${earnedAmount}` : "LOCKED";
+  els.flashRewardLine.textContent =
+    completedHours > 0 ? `${completedHours} verified hour complete` : "Har verified hour par gift amount badhega";
+  els.flashRewardAmount.textContent = `Earn Rs ${earnedAmount} / Rs ${StudyReward.MAX_REWARD_RUPEES}`;
+  els.claimReward.classList.toggle("hidden", !canClaim);
+  els.claimReward.textContent = `Claim Rs ${earnedAmount} reward`;
+  renderRewardSteps(completedHours);
 
-  if (claimed) {
-    els.rewardMessage.textContent = "Gift claim recorded: choose one study gift up to Rs 50.";
+  if (canClaim) {
+    els.rewardMessage.textContent = `${completedHours}h verified complete. Rs ${earnedAmount} reward claim ready hai.`;
+  } else if (claimed && fullyUnlocked) {
+    els.rewardMessage.textContent = `Full Rs ${StudyReward.MAX_REWARD_RUPEES} reward claimed. Great consistency.`;
+  } else if (claimed) {
+    els.rewardMessage.textContent = `Rs ${claimedAmount} claimed. Next reward ${completedHours + 1}h complete hone par milega.`;
   } else if (unlocked) {
-    els.rewardMessage.textContent = "Milestone complete! Your Rs 50 max gift is ready to claim.";
+    els.rewardMessage.textContent = `Rs ${earnedAmount} unlocked. Claim karne ke baad next hour par amount badhega.`;
   } else {
-    els.rewardMessage.textContent = `${formatRemainingHours(remainingSeconds)} verified study remaining.`;
+    els.rewardMessage.textContent = `${formatRemainingHours(remainingSeconds)} total target remaining. 1 verified hour par first reward unlock hoga.`;
   }
+}
+
+function renderRewardSteps(completedHours) {
+  els.rewardSteps.innerHTML = StudyReward.getHourlyRewardSchedule()
+    .map(
+      (step) => `
+        <span class="${step.hour <= completedHours ? "done" : ""}">
+          <strong>${step.hour}h</strong>
+          <em>Rs ${step.amount}</em>
+        </span>
+      `
+    )
+    .join("");
 }
 
 async function loadSubmissions() {
@@ -637,12 +679,19 @@ function getTodayStudySubmission() {
 
 function claimReward() {
   const verifiedSeconds = StudyReward.calculateVerifiedStudySeconds(state.data.sessions, state.submissions);
-  if (!StudyReward.isUnlocked(verifiedSeconds) || state.data.rewards.milestone16Claimed) return;
-  state.data.rewards.milestone16Claimed = true;
-  state.data.rewards.milestone16ClaimedAt = new Date().toISOString();
+  const completedHours = StudyReward.calculateCompletedHours(verifiedSeconds);
+  const earnedAmount = StudyReward.calculateRewardAmount(verifiedSeconds);
+  if (!completedHours || completedHours <= Number(state.data.rewards.claimedRewardHours || 0)) return;
+  state.data.rewards.claimedRewardHours = completedHours;
+  state.data.rewards.claimedRewardAmount = earnedAmount;
+  state.data.rewards.claimedRewardAt = new Date().toISOString();
+  if (completedHours >= StudyReward.TARGET_HOURS) {
+    state.data.rewards.milestone16Claimed = true;
+    state.data.rewards.milestone16ClaimedAt = new Date().toISOString();
+  }
   saveData();
   renderReward();
-  showToast("Gift claimed! Rs 50 tak ka study gift ready hai.");
+  showToast(`Reward claimed! Rs ${earnedAmount} tak ka study gift ready hai.`);
 }
 
 async function handleCameraToggle() {

@@ -2,6 +2,7 @@ const STORAGE_KEY = "studyflow-data-v1";
 const PERMANENT_MOBILE_ROOM = "STUDYFLOW-MOBILE";
 const ACTIVE_SESSION_KEY = "studyflow-active-session-v1";
 const CAMERA_PREF_KEY = "studyflow-camera-pref-v1";
+const CAMERA_FIT_KEY = "studyflow-camera-fit-v1";
 
 const defaultData = {
   dailyGoal: 120,
@@ -70,6 +71,7 @@ const state = {
   lastTick: null,
   cameraEnabled: false,
   cameraSource: "none",
+  cameraFitMode: localStorage.getItem(CAMERA_FIT_KEY) === "fill" ? "fill" : "fit",
   cameraStream: null,
   cameraInterval: null,
   presence: false,
@@ -117,6 +119,8 @@ const els = {
   lanLinks: document.querySelector("#lanLinks"),
   copyLink: document.querySelector("#copyLink"),
   pairStatus: document.querySelector("#pairStatus"),
+  cameraShell: document.querySelector("#cameraShell"),
+  cameraFitToggle: document.querySelector("#cameraFitToggle"),
   cameraPreview: document.querySelector("#cameraPreview"),
   cameraCanvas: document.querySelector("#cameraCanvas"),
   cameraEmpty: document.querySelector("#cameraEmpty"),
@@ -161,6 +165,7 @@ function initialize() {
   els.dailyGoal.value = state.data.dailyGoal;
   restoreActiveSession();
   restoreCameraPreference();
+  applyCameraFitMode();
   bindEvents();
   render();
   loadNotes();
@@ -201,6 +206,7 @@ function bindEvents() {
   els.taskList.addEventListener("click", handleTaskAction);
   els.taskList.addEventListener("submit", submitHomeworkProof);
   els.cameraToggle.addEventListener("change", handleCameraToggle);
+  els.cameraFitToggle.addEventListener("click", toggleCameraFit);
   els.connectPhone.addEventListener("click", handleMobileConnect);
   els.closePairing.addEventListener("click", disconnectMobileCamera);
   els.copyLink.addEventListener("click", copyMobileLink);
@@ -915,6 +921,23 @@ function renderCameraStatus(method) {
     els.presenceLabel.textContent = "Away / no presence";
   }
   updateTimerView();
+}
+
+function toggleCameraFit() {
+  state.cameraFitMode = state.cameraFitMode === "fit" ? "fill" : "fit";
+  localStorage.setItem(CAMERA_FIT_KEY, state.cameraFitMode);
+  applyCameraFitMode();
+}
+
+function applyCameraFitMode() {
+  const isFill = state.cameraFitMode === "fill";
+  els.cameraShell.classList.toggle("fill", isFill);
+  els.cameraShell.classList.toggle("fit", !isFill);
+  els.cameraFitToggle.textContent = isFill ? "Fit: Fill box" : "Fit: Full frame";
+  els.cameraFitToggle.setAttribute(
+    "aria-label",
+    isFill ? "Camera fill mode. Click for full frame mode." : "Camera full frame mode. Click for fill mode."
+  );
 }
 
 function shouldCreditStudyTime() {

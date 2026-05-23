@@ -227,6 +227,7 @@
           </div>
           <div class="camera-source-actions">
             <button class="btn btn-phone" id="connectPhone" type="button">Connect mobile camera</button>
+            <button class="camera-fit-toggle" id="cameraFitToggle" type="button">Fit: Full frame</button>
             <span class="source-label" id="sourceLabel">No camera connected</span>
           </div>
           <div class="pair-panel hidden" id="pairPanel">
@@ -243,7 +244,7 @@
             <div class="lan-links hidden" id="lanLinks"></div>
             <p class="pair-status" id="pairStatus">Waiting for mobile phone...</p>
           </div>
-          <div class="camera-shell">
+          <div class="camera-shell fit" id="cameraShell">
             <video id="cameraPreview" autoplay muted playsinline></video>
             <canvas id="cameraCanvas" hidden></canvas>
             <div class="camera-empty" id="cameraEmpty">
@@ -253,6 +254,7 @@
             </div>
             <div class="camera-tag" id="cameraTag">OFF</div>
           </div>
+          <p class="camera-fit-note">Full frame mode me camera ka poora view dikhega. Fill mode screen bhar dega, par edges thode crop ho sakte hain.</p>
           <div class="presence-row">
             <div>
               <span class="signal" id="presenceSignal"></span>

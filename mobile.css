@@ -102,7 +102,9 @@ h1 {
   overflow: hidden;
   display: grid;
   place-items: center;
-  height: min(49vh, 400px);
+  height: min(62vh, 520px);
+  min-height: 320px;
+  aspect-ratio: 9 / 16;
   border: 1px dashed rgba(151, 176, 205, 0.24);
   border-radius: 15px;
   margin-bottom: 17px;
@@ -114,6 +116,13 @@ h1 {
   height: 100%;
   object-fit: contain;
   background: #061521;
+}
+
+@media (orientation: landscape) {
+  .preview {
+    aspect-ratio: 16 / 9;
+    height: min(58vh, 440px);
+  }
 }
 
 .preview div {

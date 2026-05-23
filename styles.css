@@ -1107,6 +1107,7 @@ input::placeholder {
 
 .camera-source-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   margin: -7px 0 16px;
@@ -1123,6 +1124,16 @@ input::placeholder {
 .source-label {
   color: var(--muted);
   font-size: 11px;
+}
+
+.camera-fit-toggle {
+  border: 1px solid rgba(181, 174, 254, 0.26);
+  border-radius: 999px;
+  padding: 9px 13px;
+  color: #d7d4ff;
+  background: rgba(115, 103, 246, 0.12);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .pair-panel {
@@ -1211,7 +1222,9 @@ input::placeholder {
   overflow: hidden;
   display: grid;
   place-items: center;
-  height: 201px;
+  height: clamp(260px, 34vw, 420px);
+  min-height: 260px;
+  aspect-ratio: 16 / 9;
   border: 1px dashed rgba(151, 176, 205, 0.2);
   border-radius: 13px;
   background: #091a2d;
@@ -1223,6 +1236,17 @@ input::placeholder {
   object-fit: contain;
   background: #061521;
   transform: scaleX(-1);
+}
+
+.camera-shell.fill video {
+  object-fit: cover;
+}
+
+.camera-fit-note {
+  margin: 9px 0 0;
+  color: #98adc5;
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .camera-empty {
@@ -1487,6 +1511,16 @@ input::placeholder {
   .homework-upload {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .camera-source-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .camera-shell {
+    height: clamp(270px, 72vw, 380px);
+    min-height: 270px;
   }
 
   .reward-note {

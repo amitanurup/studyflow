@@ -4,3 +4,4 @@ submitted-files/
 **/build/
 **/.gradle/
 **/local.properties
+.android-build/

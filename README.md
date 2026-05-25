@@ -31,6 +31,23 @@ http://192.168.1.8:4173
 
 To pair a phone, select **Connect mobile camera** on the dashboard and open the generated mobile link on the phone. The generated link uses a permanent room (`STUDYFLOW-MOBILE`), so you can bookmark it on the phone and reuse it for that deployed app.
 
+## Separate UPI payment alert app
+
+UPI payment received alert sync StudyFlow se alag app me hai:
+
+```powershell
+cd upi-payment-alert
+npm start
+```
+
+PC dashboard open karein:
+
+```text
+http://localhost:4180
+```
+
+Mobile link PC dashboard par dikhega. Phone se amount bhejne par PC par popup aur sound alert aayega. Browser GPay, PhonePe, Paytm ya bank-app notifications automatically read nahi kar sakta, isliye mobile page se alert manually send karna hota hai.
+
 ## Public launch on Render
 
 This project is ready for a public HTTPS launch on Render using `render.yaml`.

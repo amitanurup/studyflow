@@ -85,10 +85,7 @@ const state = {
   peerConnection: null,
   pairingRoom: null,
   notes: [],
-  submissions: [],
-  paymentAlerts: [],
-  paymentSoundEnabled: false,
-  paymentAudioContext: null
+  submissions: []
 };
 
 const els = {
@@ -138,11 +135,6 @@ const els = {
   clearHistory: document.querySelector("#clearHistory"),
   notesGrid: document.querySelector("#notesGrid"),
   refreshNotes: document.querySelector("#refreshNotes"),
-  enablePaymentSound: document.querySelector("#enablePaymentSound"),
-  paymentAlertBanner: document.querySelector("#paymentAlertBanner"),
-  paymentAlertAmount: document.querySelector("#paymentAlertAmount"),
-  paymentAlertFrom: document.querySelector("#paymentAlertFrom"),
-  paymentAlertList: document.querySelector("#paymentAlertList"),
   homeworkProofStatus: document.querySelector("#homeworkProofStatus"),
   homeworkProofCount: document.querySelector("#homeworkProofCount"),
   studyProofStatus: document.querySelector("#studyProofStatus"),
@@ -229,7 +221,6 @@ function bindEvents() {
   els.clearHistory.addEventListener("click", clearHistory);
   els.refreshNotes.addEventListener("click", loadNotes);
   els.notesGrid.addEventListener("click", handleNoteAction);
-  els.enablePaymentSound.addEventListener("click", enablePaymentSound);
   els.studyProofForm.addEventListener("submit", submitStudyProof);
   els.claimReward.addEventListener("click", claimReward);
 }
@@ -239,7 +230,6 @@ function render() {
   renderTasks();
   renderSessions();
   renderNotes();
-  renderPaymentAlerts();
   renderDailyProof();
   renderReward();
   renderCameraStatus();
@@ -347,27 +337,6 @@ function renderNotes() {
               <button type="button" data-note-delete="${escapeHtml(note.fileName)}">Delete</button>
             </div>
           </div>
-        </article>
-      `
-    )
-    .join("");
-}
-
-function renderPaymentAlerts() {
-  if (!state.paymentAlerts.length) {
-    els.paymentAlertList.innerHTML = '<div class="empty-state">Phone se payment alert bhejne par yahan history dikhegi.</div>';
-    return;
-  }
-  els.paymentAlertList.innerHTML = state.paymentAlerts
-    .map(
-      (payment) => `
-        <article class="payment-item">
-          <div>
-            <strong>Rs ${escapeHtml(payment.amount)}</strong>
-            <span>${escapeHtml(payment.from || "Mobile UPI")}</span>
-          </div>
-          <p>${escapeHtml(payment.note || "Payment received")}</p>
-          <time>${escapeHtml(formatPaymentTime(payment.receivedAt))}</time>
         </article>
       `
     )
@@ -854,10 +823,6 @@ async function handleSignalMessage(event) {
     showToast("Note photo PC par save ho gayi.");
     return;
   }
-  if (message.type === "payment-received") {
-    handlePaymentReceived(message.payment);
-    return;
-  }
   if (message.type === "offer") {
     await acceptMobileOffer(message.sdp);
     return;
@@ -905,66 +870,6 @@ function activateMobileCamera(stream) {
   els.pairStatus.textContent = "Mobile camera is live on laptop.";
   renderCameraStatus();
   showToast("Mobile camera connected for study tracking.");
-}
-
-function enablePaymentSound() {
-  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContextClass) {
-    showToast("Is browser me payment sound supported nahi hai.");
-    return;
-  }
-  state.paymentAudioContext = state.paymentAudioContext || new AudioContextClass();
-  state.paymentAudioContext.resume?.();
-  state.paymentSoundEnabled = true;
-  els.enablePaymentSound.textContent = "Sound enabled";
-  els.enablePaymentSound.disabled = true;
-  els.enablePaymentSound.classList.remove("pulse-needed");
-  playPaymentSound();
-  showToast("Payment sound enabled.");
-}
-
-function handlePaymentReceived(payment = {}) {
-  const alert = {
-    amount: Number(payment.amount || 0).toFixed(0),
-    from: payment.from || "Mobile UPI",
-    note: payment.note || "Payment received",
-    receivedAt: payment.receivedAt || new Date().toISOString()
-  };
-  state.paymentAlerts = [alert, ...state.paymentAlerts].slice(0, 12);
-  renderPaymentAlerts();
-  els.paymentAlertAmount.textContent = `Rs ${alert.amount}`;
-  els.paymentAlertFrom.textContent = alert.from;
-  els.paymentAlertBanner.classList.remove("hidden");
-  window.setTimeout(() => els.paymentAlertBanner.classList.add("hidden"), 9000);
-  showToast(`Payment received: Rs ${alert.amount}`);
-  playPaymentSound();
-}
-
-function playPaymentSound() {
-  if (!state.paymentSoundEnabled) {
-    els.enablePaymentSound.classList.add("pulse-needed");
-    return;
-  }
-  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContextClass) return;
-  const context = state.paymentAudioContext || new AudioContextClass();
-  state.paymentAudioContext = context;
-  context.resume?.();
-  [0, 180, 360].forEach((delay, index) => {
-    window.setTimeout(() => {
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.type = "sine";
-      oscillator.frequency.value = [880, 1175, 1480][index];
-      gain.gain.setValueAtTime(0.001, context.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.34, context.currentTime + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.22);
-      oscillator.connect(gain);
-      gain.connect(context.destination);
-      oscillator.start();
-      oscillator.stop(context.currentTime + 0.24);
-    }, delay);
-  });
 }
 
 function sendSignal(message) {
@@ -1232,14 +1137,6 @@ function formatSessionDate(dateString) {
     month: "short",
     hour: "numeric",
     minute: "2-digit"
-  }).format(new Date(dateString));
-}
-
-function formatPaymentTime(dateString) {
-  return new Intl.DateTimeFormat("en-IN", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit"
   }).format(new Date(dateString));
 }
 

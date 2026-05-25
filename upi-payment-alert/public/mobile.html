@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="hi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UPI Payment Alert | Mobile</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="mobile-body">
+    <main class="phone-shell">
+      <section class="card phone-card">
+        <p class="eyebrow">MOBILE SENDER</p>
+        <h1>Payment received PC par bhejo</h1>
+        <p class="muted">UPI payment receive hone ke baad amount enter karo. PC par sound alert aayega.</p>
+        <div class="status-line">
+          <span id="mobileDot" class="dot"></span>
+          <strong id="mobileStatus">Connecting...</strong>
+        </div>
+
+        <form id="paymentForm" class="payment-form">
+          <label>
+            Amount
+            <input id="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="50" required />
+          </label>
+          <label>
+            UPI app
+            <select id="upiApp">
+              <option>GPay</option>
+              <option>PhonePe</option>
+              <option>Paytm</option>
+              <option>BHIM</option>
+              <option>Other UPI</option>
+            </select>
+          </label>
+          <label>
+            From / Customer
+            <input id="from" type="text" placeholder="Customer name" />
+          </label>
+          <label>
+            Note
+            <input id="note" type="text" placeholder="Order / payment note" />
+          </label>
+          <button type="submit">Send payment received alert</button>
+        </form>
+
+        <div class="quick-buttons">
+          <button data-amount="10" type="button">Rs 10</button>
+          <button data-amount="20" type="button">Rs 20</button>
+          <button data-amount="50" type="button">Rs 50</button>
+          <button data-amount="100" type="button">Rs 100</button>
+        </div>
+      </section>
+    </main>
+    <script src="./mobile.js"></script>
+  </body>
+</html>

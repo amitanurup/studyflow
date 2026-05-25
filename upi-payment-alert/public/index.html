@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="hi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UPI Payment Alert | PC Dashboard</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero card">
+        <div>
+          <p class="eyebrow">PC DASHBOARD</p>
+          <h1>UPI Payment Received Alert</h1>
+          <p>Mobile se payment received bhejo, PC par popup aur sound ke saath alert aayega.</p>
+        </div>
+        <div class="status-box">
+          <span id="connectionDot" class="dot"></span>
+          <strong id="connectionStatus">Connecting...</strong>
+          <small id="roomLabel">Room loading...</small>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card setup-card">
+          <p class="eyebrow">MOBILE LINK</p>
+          <h2>Phone ko pair karo</h2>
+          <p class="muted">Same Wi-Fi par phone me ye link open karo.</p>
+          <div class="link-row">
+            <input id="mobileLink" readonly />
+            <button id="copyLink" type="button">Copy</button>
+          </div>
+          <div id="lanLinks" class="lan-links"></div>
+          <button id="enableSound" class="sound-button" type="button">Enable payment sound</button>
+          <p class="tiny">Browser sound ke liye ek baar button dabana zaroori hota hai.</p>
+        </article>
+
+        <article class="card alert-card">
+          <p class="eyebrow">LIVE ALERT</p>
+          <div id="bigAlert" class="big-alert hidden">
+            <span>PAYMENT RECEIVED</span>
+            <strong id="alertAmount">Rs 0</strong>
+            <em id="alertMeta">Mobile UPI</em>
+          </div>
+          <div id="emptyAlert" class="empty">Abhi koi payment alert nahi aaya.</div>
+        </article>
+      </section>
+
+      <section class="card history-card">
+        <div class="history-head">
+          <div>
+            <p class="eyebrow">HISTORY</p>
+            <h2>Recent payment alerts</h2>
+          </div>
+          <button id="clearHistory" type="button">Clear</button>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>

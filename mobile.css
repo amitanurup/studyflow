@@ -64,6 +64,10 @@ body {
   background: rgba(13, 33, 55, 0.87);
 }
 
+.payment-phone-card {
+  margin-top: 16px;
+}
+
 .eyebrow {
   margin: 0 0 7px;
   color: var(--cyan);
@@ -176,6 +180,29 @@ select {
   font: inherit;
 }
 
+.payment-form {
+  display: grid;
+  gap: 12px;
+}
+
+.payment-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.payment-form input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 11px;
+  color: var(--text);
+  background: #102943;
+  font: inherit;
+}
+
 button {
   width: 100%;
   border: 1px solid transparent;
@@ -200,6 +227,12 @@ button {
   margin-top: 9px;
   color: #051827;
   background: linear-gradient(135deg, #25d1d1, #2ad2a2);
+}
+
+.payment-send {
+  color: #3f2500;
+  background: linear-gradient(135deg, #ffe37b, #ffac2f);
+  box-shadow: 0 8px 22px rgba(255, 179, 47, 0.22);
 }
 
 .hidden {

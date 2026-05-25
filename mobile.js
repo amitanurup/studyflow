@@ -9,6 +9,10 @@ const elements = {
   shareCamera: document.querySelector("#shareCamera"),
   captureNote: document.querySelector("#captureNote"),
   stopCamera: document.querySelector("#stopCamera"),
+  paymentForm: document.querySelector("#paymentForm"),
+  paymentAmount: document.querySelector("#paymentAmount"),
+  paymentFrom: document.querySelector("#paymentFrom"),
+  paymentNote: document.querySelector("#paymentNote"),
   status: document.querySelector("#connectionStatus")
 };
 
@@ -31,6 +35,7 @@ function initialize() {
   elements.shareCamera.addEventListener("click", shareCamera);
   elements.captureNote.addEventListener("click", captureNotePhoto);
   elements.stopCamera.addEventListener("click", stopCamera);
+  elements.paymentForm.addEventListener("submit", sendPaymentAlert);
 }
 
 function connectToLaptop() {
@@ -106,6 +111,31 @@ function captureNotePhoto() {
     return;
   }
   setStatus("Photo PC par save ho rahi hai...");
+}
+
+function sendPaymentAlert(event) {
+  event.preventDefault();
+  const amount = Number(elements.paymentAmount.value);
+  if (!amount || amount < 1) {
+    setStatus("Valid payment amount enter karein.", true);
+    return;
+  }
+  const sent = sendSignal({
+    type: "payment-received",
+    payment: {
+      amount,
+      from: elements.paymentFrom.value.trim() || "Mobile UPI",
+      note: elements.paymentNote.value.trim() || "Payment received",
+      receivedAt: new Date().toISOString()
+    }
+  });
+  if (!sent) {
+    setStatus("Laptop connection ready nahi hai. PC par Connect mobile camera open rakhein.", true);
+    return;
+  }
+  elements.paymentAmount.value = "";
+  elements.paymentNote.value = "";
+  setStatus(`Payment alert sent to PC: Rs ${amount}`);
 }
 
 async function handleSignalMessage(event) {

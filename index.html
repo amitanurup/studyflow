@@ -296,6 +296,26 @@
         <p class="notes-location">Mobile se click ki gayi photos PC par <strong>saved-notes</strong> folder me automatically save hongi.</p>
         <div class="notes-grid" id="notesGrid"></div>
       </section>
+
+      <section class="card payment-card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">UPI PAYMENT ALERT</p>
+            <h2>Mobile se PC payment received sync</h2>
+          </div>
+          <button class="btn btn-ghost btn-small" id="enablePaymentSound" type="button">Enable sound</button>
+        </div>
+        <p class="payment-note">
+          Phone companion page par payment details bhejne par PC par sound aur popup alert aayega.
+          Browser UPI apps ke private notifications automatically read nahi kar sakta.
+        </p>
+        <div class="payment-alert-panel hidden" id="paymentAlertBanner">
+          <span>PAYMENT RECEIVED</span>
+          <strong id="paymentAlertAmount">Rs 0</strong>
+          <em id="paymentAlertFrom">From mobile</em>
+        </div>
+        <div class="payment-list" id="paymentAlertList"></div>
+      </section>
     </main>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

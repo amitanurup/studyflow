@@ -840,6 +840,27 @@ h2 {
   }
 }
 
+@keyframes paymentPop {
+  0% {
+    transform: scale(0.97);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes soundNudge {
+  0%,
+  100% {
+    box-shadow: none;
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(255, 179, 87, 0.18);
+  }
+}
+
 .workspace-grid {
   display: grid;
   grid-template-columns: 1.06fr 0.94fr;
@@ -934,7 +955,8 @@ h2 {
 .homework,
 .camera-card,
 .sessions,
-.captured-notes {
+.captured-notes,
+.payment-card {
   padding: 22px;
 }
 
@@ -1516,6 +1538,96 @@ input::placeholder {
   background: rgba(255, 102, 138, 0.08);
 }
 
+.payment-note {
+  margin: -10px 0 15px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.payment-alert-panel {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 14px;
+  border: 1px solid rgba(255, 212, 84, 0.42);
+  border-radius: 15px;
+  margin-bottom: 14px;
+  padding: 15px 17px;
+  color: #fff4bd;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(255, 236, 132, 0.22), transparent 26%),
+    linear-gradient(135deg, rgba(255, 178, 36, 0.26), rgba(37, 209, 209, 0.12)),
+    rgba(8, 21, 34, 0.88);
+  box-shadow: 0 0 28px rgba(255, 189, 54, 0.18);
+  animation: paymentPop 900ms ease both;
+}
+
+.payment-alert-panel span {
+  color: #ffcf63;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.payment-alert-panel strong {
+  grid-row: span 2;
+  align-self: center;
+  color: #ffffff;
+  font-size: 28px;
+}
+
+.payment-alert-panel em {
+  color: #cde3f7;
+  font-size: 12px;
+  font-style: normal;
+}
+
+.payment-list {
+  display: grid;
+  gap: 10px;
+}
+
+.payment-item {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.8fr) 1fr auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 12px;
+  background: rgba(7, 21, 37, 0.44);
+}
+
+.payment-item strong,
+.payment-item span {
+  display: block;
+}
+
+.payment-item strong {
+  color: #ffe08a;
+  font-size: 18px;
+}
+
+.payment-item span,
+.payment-item p,
+.payment-item time {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.payment-item p {
+  margin: 0;
+}
+
+.payment-item time {
+  text-align: right;
+}
+
+.pulse-needed {
+  animation: soundNudge 1s ease-in-out infinite;
+}
+
 .toast {
   position: fixed;
   right: 24px;
@@ -1595,6 +1707,19 @@ input::placeholder {
   .homework-upload {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .payment-item {
+    display: block;
+  }
+
+  .payment-item p {
+    margin: 8px 0;
+  }
+
+  .payment-item time {
+    display: block;
+    text-align: left;
   }
 
   .camera-source-actions {

@@ -24,9 +24,14 @@ const server = http.createServer((request, response) => {
       room: roomName,
       pcUrl: getRequestBaseUrl(request),
       mobileUrl: `${getRequestBaseUrl(request)}/mobile.html?room=${encodeURIComponent(roomName)}`,
+      smsBridgeUrl: `${getRequestBaseUrl(request)}/api/sms-payment`,
       lanUrls: getLanAddresses().map((address) => `http://${address}:${port}`),
-      note: "UPI apps ke private notifications browser automatically read nahi kar sakta. Mobile page se alert bhejein."
+      note: "Automatic SMS sync ke liye Android SMS Bridge app ko SMS permission aur smsBridgeUrl chahiye."
     });
+    return;
+  }
+  if (url.pathname === "/api/sms-payment" && request.method === "POST") {
+    receiveSmsPayment(request, response);
     return;
   }
 
@@ -125,8 +130,8 @@ function getLanAddresses() {
     .map((network) => network.address);
 }
 
-function sendJson(response, data) {
-  response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+function sendJson(response, data, statusCode = 200) {
+  response.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" });
   response.end(JSON.stringify(data));
 }
 
@@ -144,5 +149,69 @@ function sanitizePayment(payment = {}) {
     note: String(payment.note || "Payment received").slice(0, 120),
     upiApp: String(payment.upiApp || "UPI").slice(0, 40),
     receivedAt: payment.receivedAt || new Date().toISOString()
+  };
+}
+
+function receiveSmsPayment(request, response) {
+  readJsonBody(request, (error, body) => {
+    if (error) {
+      sendJson(response, { ok: false, message: "Invalid JSON body." }, 400);
+      return;
+    }
+    const parsed = parseUpiSms(body.sms || body.message || "", body.sender || "");
+    if (!parsed) {
+      sendJson(response, { ok: false, message: "UPI credit SMS parse nahi hua." }, 422);
+      return;
+    }
+    const payment = sanitizePayment({
+      ...parsed,
+      receivedAt: body.receivedAt || new Date().toISOString()
+    });
+    const room = rooms.get(roomName);
+    if (room) broadcast(room.pc, { type: "payment-received", payment });
+    sendJson(response, { ok: true, payment });
+  });
+}
+
+function readJsonBody(request, callback) {
+  const chunks = [];
+  let size = 0;
+  request.on("data", (chunk) => {
+    size += chunk.length;
+    if (size > 64_000) request.destroy();
+    chunks.push(chunk);
+  });
+  request.on("end", () => {
+    try {
+      callback(null, JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}"));
+    } catch (error) {
+      callback(error);
+    }
+  });
+}
+
+function parseUpiSms(message, sender = "") {
+  const text = String(message).replace(/\s+/g, " ").trim();
+  const lower = text.toLowerCase();
+  const hasCreditSignal = /\b(credited|received|deposited|cr|credit)\b/.test(lower);
+  const hasDebitSignal = /\b(debited|spent|sent|paid|withdrawn|purchase|dr|debit)\b/.test(lower);
+  if (!hasCreditSignal || hasDebitSignal) return null;
+
+  const amountMatch = text.match(/(?:rs\.?|inr|₹)\s*([0-9][0-9,]*(?:\.\d{1,2})?)/i);
+  if (!amountMatch) return null;
+  const amount = Number(amountMatch[1].replace(/,/g, ""));
+  if (!amount || amount <= 0) return null;
+
+  const fromMatch =
+    text.match(/\bfrom\s+([A-Z0-9 ._-]{2,40}?)(?:\s+on|\s+via|\s+upi|\s+ref|\s+utr|\.|,|$)/i) ||
+    text.match(/\bby\s+([A-Z0-9 ._-]{2,40}?)(?:\s+on|\s+via|\s+upi|\s+ref|\s+utr|\.|,|$)/i) ||
+    text.match(/\bVPA\s+([A-Z0-9._-]+@[A-Z0-9._-]+)/i);
+
+  const refMatch = text.match(/\b(?:ref|utr|upi ref|txn|transaction)\s*(?:no|id|number)?[:\s.-]*([A-Z0-9]{6,24})/i);
+  return {
+    amount,
+    from: fromMatch ? fromMatch[1].trim() : sender || "SMS payment",
+    note: refMatch ? `SMS auto read - Ref ${refMatch[1]}` : "SMS auto read",
+    upiApp: sender || "Bank SMS"
   };
 }

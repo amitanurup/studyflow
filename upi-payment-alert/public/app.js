@@ -5,6 +5,8 @@ const els = {
   roomLabel: document.querySelector("#roomLabel"),
   mobileLink: document.querySelector("#mobileLink"),
   copyLink: document.querySelector("#copyLink"),
+  smsBridgeUrl: document.querySelector("#smsBridgeUrl"),
+  copySmsBridgeUrl: document.querySelector("#copySmsBridgeUrl"),
   lanLinks: document.querySelector("#lanLinks"),
   enableSound: document.querySelector("#enableSound"),
   bigAlert: document.querySelector("#bigAlert"),
@@ -35,6 +37,7 @@ async function initialize() {
 
 function bindEvents() {
   els.copyLink.addEventListener("click", copyMobileLink);
+  els.copySmsBridgeUrl.addEventListener("click", copySmsBridgeUrl);
   els.enableSound.addEventListener("click", enableSound);
   els.clearHistory.addEventListener("click", () => {
     state.history = [];
@@ -50,8 +53,10 @@ async function loadInfo() {
     state.room = info.room;
     const mobileBaseUrl = info.lanUrls.find((url) => url.startsWith("http://192.168.")) || info.lanUrls[0] || info.pcUrl;
     const phoneLink = `${mobileBaseUrl}/mobile.html?room=${encodeURIComponent(info.room)}`;
+    const smsEndpoint = `${mobileBaseUrl}/api/sms-payment`;
     els.roomLabel.textContent = info.room;
     els.mobileLink.value = phoneLink;
+    els.smsBridgeUrl.value = smsEndpoint;
     els.lanLinks.innerHTML = info.lanUrls
       .map((url) => {
         const mobileUrl = `${url}/mobile.html?room=${encodeURIComponent(info.room)}`;
@@ -175,6 +180,16 @@ async function copyMobileLink() {
   } catch {
     els.mobileLink.select();
     showToast("Link select ho gaya.");
+  }
+}
+
+async function copySmsBridgeUrl() {
+  try {
+    await navigator.clipboard.writeText(els.smsBridgeUrl.value);
+    showToast("SMS bridge endpoint copied.");
+  } catch {
+    els.smsBridgeUrl.select();
+    showToast("Endpoint select ho gaya.");
   }
 }
 

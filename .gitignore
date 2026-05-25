@@ -1,3 +1,6 @@
 node_modules/
 submitted-files/
 .env
+**/build/
+**/.gradle/
+**/local.properties

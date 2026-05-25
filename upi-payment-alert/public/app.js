@@ -48,8 +48,10 @@ async function loadInfo() {
     const response = await fetch("/api/info");
     const info = await response.json();
     state.room = info.room;
+    const mobileBaseUrl = info.lanUrls.find((url) => url.startsWith("http://192.168.")) || info.lanUrls[0] || info.pcUrl;
+    const phoneLink = `${mobileBaseUrl}/mobile.html?room=${encodeURIComponent(info.room)}`;
     els.roomLabel.textContent = info.room;
-    els.mobileLink.value = info.mobileUrl;
+    els.mobileLink.value = phoneLink;
     els.lanLinks.innerHTML = info.lanUrls
       .map((url) => {
         const mobileUrl = `${url}/mobile.html?room=${encodeURIComponent(info.room)}`;
